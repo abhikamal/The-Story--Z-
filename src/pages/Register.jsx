@@ -38,7 +38,7 @@ const Register = () => {
       <div className="glass-card" style={{ width: '100%', maxWidth: '450px', padding: '2.5rem' }}>
         <div className="text-center mb-4">
           <h2>Create Account</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Join NEXUS for exclusive products</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Join The Story 'Z' for exclusive collections</p>
         </div>
         
         {error && <div style={{ color: 'var(--danger)', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}

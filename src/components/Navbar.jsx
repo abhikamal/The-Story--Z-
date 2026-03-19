@@ -17,7 +17,7 @@ const Navbar = () => {
     <nav className="navbar glass">
       <div className="container">
         <Link to="/" className="brand" style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)' }}>
-          NEX<span className="text-gradient">US</span>
+          The Story <span className="text-gradient">'Z'</span>
         </Link>
 
         <div className="nav-links">

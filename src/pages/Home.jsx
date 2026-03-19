@@ -13,26 +13,26 @@ const Home = () => {
                 🚀 The Future of E-Commerce
               </div>
               <h1 className="hero-title" style={{ marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>
-                Discover Premium <br />
-                <span className="text-gradient">Digital Assets</span>
+                Your Premium <br />
+                <span className="text-gradient">Anime Story Starts Here</span>
               </h1>
               <p className="hero-subtitle" style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', marginBottom: '2.5rem', maxWidth: '500px' }}>
-                Explore our curated collection of high-quality products. From advanced electronics to digital tools, find exactly what you need to upgrade your life.
+                Exclusive Anime Accessories, Figures, and Collectibles. From iconic models to daily-wear gear, we bring your favorite stories to life.
               </p>
               <div className="hero-btns" style={{ display: 'flex', gap: '1rem' }}>
                 <Link to="/catalog" className="btn btn-primary">
-                  Shop Now <ArrowRight size={18} />
+                  Explore Collection <ArrowRight size={18} />
                 </Link>
                 <Link to="/catalog" className="btn btn-secondary">
-                  Browse Catalog
+                  Our Products
                 </Link>
               </div>
             </div>
             
             <div className="hero-image glass-card" style={{ height: '500px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem', background: 'linear-gradient(145deg, var(--surface-color), var(--surface-accent))', position: 'relative' }}>
               <div style={{ width: '200px', height: '200px', borderRadius: '50%', background: 'var(--accent-gradient)', filter: 'blur(40px)', position: 'absolute', opacity: 0.3 }}></div>
-              <TrendingUp size={64} color="var(--accent-primary)" style={{ zIndex: 1 }} />
-              <h3 style={{ zIndex: 1 }}>Featured Collection</h3>
+              <Star size={64} color="var(--accent-primary)" style={{ zIndex: 1 }} />
+              <h3 style={{ zIndex: 1 }}>Official Merchandise</h3>
             </div>
           </div>
         </div>
@@ -46,8 +46,8 @@ const Home = () => {
       <section className="section" style={{ background: 'var(--surface-color)' }}>
         <div className="container">
           <div className="text-center mb-4">
-            <h2 style={{ fontSize: '2.5rem' }}>Why Choose <span className="text-gradient">NEXUS</span></h2>
-            <p style={{ color: 'var(--text-secondary)' }}>Experience e-commerce like never before</p>
+            <h2 style={{ fontSize: '2.5rem' }}>Experience <span className="text-gradient">The Story 'Z'</span></h2>
+            <p style={{ color: 'var(--text-secondary)' }}>More than just accessories—it's part of your legend</p>
           </div>
           
           <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
