@@ -1,10 +1,22 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
 import { Search, Plus, Trash2, Edit2, Package, ArrowLeft, Save } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 const AdminInventory = () => {
   const { inventory, addProduct, removeProduct, updateProduct } = useStore();
+  const { isAdmin, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authLoading && !isAdmin) {
+      navigate('/login');
+    }
+  }, [isAdmin, authLoading, navigate]);
+
+  if (authLoading) return <div className="container" style={{ paddingTop: '100px' }}>Loading...</div>;
+  if (!isAdmin) return null;
   
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');

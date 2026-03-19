@@ -12,8 +12,7 @@ const ADMIN_EMAILS = [
   'siri',
   'abhikamal2020@gmail.com',
   'umav4000@gmail.com',
-  // Add more admin emails here
-];
+].map(e => e.toLowerCase());
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -92,7 +91,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     loading,
-    isAdmin: user && ADMIN_EMAILS.includes(user.email)
+    isAdmin: user && ADMIN_EMAILS.includes(user.email?.toLowerCase())
   };
 
   return (

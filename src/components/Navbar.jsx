@@ -5,7 +5,7 @@ import { useCart } from '../context/CartContext';
 
 const Navbar = () => {
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   
   const isActive = (path) => {
     return location.pathname === path ? 'active' : '';
@@ -24,7 +24,7 @@ const Navbar = () => {
           <Link to="/" className={`nav-link ${isActive('/')}`}>Home</Link>
           <Link to="/catalog" className={`nav-link ${isActive('/catalog')}`}>Shop</Link>
           <Link to="/request" className={`nav-link ${isActive('/request')}`}>Request Item</Link>
-          {user?.role === 'admin' && (
+          {isAdmin && (
             <Link to="/admin" className={`nav-link ${isActive('/admin')}`} style={{ color: 'var(--accent-primary)' }}>Admin Panel</Link>
           )}
         </div>

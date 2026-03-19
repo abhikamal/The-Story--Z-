@@ -1,11 +1,23 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { Package, Users, Activity, FileText, Plus, Trash2, Tag, ArrowRight } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
-import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Admin = () => {
-  const { inventory, orders, coupons, addCoupon, removeCoupon } = useStore();
+  const { inventory, orders, coupons, itemRequests, addCoupon, removeCoupon } = useStore();
+  const { isAdmin, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [newCoupon, setNewCoupon] = useState({ code: '', discount: '' });
+
+  useEffect(() => {
+    if (!authLoading && !isAdmin) {
+      navigate('/login');
+    }
+  }, [isAdmin, authLoading, navigate]);
+
+  if (authLoading) return <div className="container" style={{ paddingTop: '100px' }}>Loading...</div>;
+  if (!isAdmin) return null;
 
   const handleCreateCoupon = async (e) => {
     e.preventDefault();
