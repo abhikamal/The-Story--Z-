@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../supabase';
 
 const AuthContext = createContext();
 
@@ -11,59 +12,68 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check local storage for existing session
-    const storedUser = localStorage.getItem('nexus_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    // Check active sessions and sets the user
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    // Listen for changes on auth state (logged in, signed out, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = (email, password) => {
-    // Hardcoded Admin Check
-    if (email === 'siri' && password === '99887766') {
-      const adminUser = {
-        id: 'admin-1',
-        name: 'Siri',
-        email: 'siri',
-        role: 'admin'
-      };
-      setUser(adminUser);
-      localStorage.setItem('nexus_user', JSON.stringify(adminUser));
+  const login = async (email, password) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error('Login error:', error.message);
+        return { success: false, error: error.message };
+      }
+
       navigate('/catalog');
       return { success: true };
+    } catch (err) {
+      console.error('Unexpected login error:', err);
+      return { success: false, error: 'An unexpected error occurred' };
     }
-    
-    // Mock normal user login
-    const normalUser = {
-      id: 'user-1',
-      name: email.split('@')[0],
-      email: email,
-      role: 'user'
-    };
-    setUser(normalUser);
-    localStorage.setItem('nexus_user', JSON.stringify(normalUser));
-    navigate('/catalog');
-    return { success: true };
   };
 
-  const register = (name, email, password) => {
-    // Mock registration
-    const newUser = {
-      id: `user-${Date.now()}`,
-      name: name,
-      email: email,
-      role: 'user'
-    };
-    setUser(newUser);
-    localStorage.setItem('nexus_user', JSON.stringify(newUser));
-    navigate('/catalog');
-    return { success: true };
+  const register = async (name, email, password) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+        },
+      });
+
+      if (error) {
+        console.error('Registration error:', error.message);
+        return { success: false, error: error.message };
+      }
+
+      navigate('/catalog');
+      return { success: true };
+    } catch (err) {
+      console.error('Unexpected registration error:', err);
+      return { success: false, error: 'An unexpected error occurred' };
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('nexus_user');
+  const logout = async () => {
+    await supabase.auth.signOut();
     navigate('/login');
   };
 
@@ -72,7 +82,8 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    loading
+    loading,
+    isAdmin: user?.email === 'siri' || user?.email === 'siri7@example.com' // Example admin check
   };
 
   return (

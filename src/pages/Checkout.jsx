@@ -21,15 +21,15 @@ const Checkout = () => {
     e.preventDefault();
     const validCoupon = coupons.find(c => c.code === couponCode.toUpperCase());
     if (validCoupon) {
-      setDiscount(subtotal * (validCoupon.discountPercent / 100));
-      alert(`Coupon applied! ${validCoupon.discountPercent}% off.`);
+      setDiscount(subtotal * (validCoupon.discount_percent / 100));
+      alert(`Coupon applied! ${validCoupon.discount_percent}% off.`);
     } else {
       alert("Invalid coupon code or no coupons generated.");
       setDiscount(0);
     }
   };
 
-  const handleCheckout = (e) => {
+  const handleCheckout = async (e) => {
     e.preventDefault();
     if (cartItems.length === 0) {
       alert("Your cart is empty!");
@@ -37,7 +37,7 @@ const Checkout = () => {
     }
     
     // Process "payment" and save order
-    addOrder({
+    await addOrder({
       items: cartItems,
       total: finalTotal,
       paymentMethod,

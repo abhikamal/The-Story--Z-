@@ -1,68 +1,115 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../supabase';
 
 const StoreContext = createContext();
 
 export const useStore = () => useContext(StoreContext);
 
-const INITIAL_PRODUCTS = [
-  { id: '1', name: 'Gojo Satoru 1/7 Scale Figure', price: 14999, stock: 10, category: 'Figures', image: 'https://placehold.co/300x400/2a2a35/9ece6a?text=Gojo+Figure' },
-  { id: '2', name: 'Demon Slayer Katana Replica', price: 4500, stock: 25, category: 'Decor', image: 'https://placehold.co/300x400/2a2a35/f7768e?text=Katana' },
-  { id: '3', name: 'Neon Genesis Evangelion Poster', price: 899, stock: 100, category: 'Decor', image: 'https://placehold.co/300x400/2a2a35/7aa2f7?text=Eva+Poster' },
-  { id: '4', name: 'Gundam RX-78-2 Master Grade Model', price: 6500, stock: 15, category: 'Models', image: 'https://placehold.co/300x400/2a2a35/e0af68?text=Gundam+Model' },
-  { id: '5', name: 'Akatsuki Cloak Premium Edition', price: 3499, stock: 50, category: 'Apparel', image: 'https://placehold.co/300x400/2a2a35/bb9af7?text=Akatsuki+Cloak' },
-  { id: '6', name: 'Studio Ghibli Music Box', price: 2999, stock: 20, category: 'Decor', image: 'https://placehold.co/300x400/2a2a35/7dcfff?text=Music+Box' },
-];
-
 export const StoreProvider = ({ children }) => {
   const [inventory, setInventory] = useState([]);
   const [orders, setOrders] = useState([]);
   const [coupons, setCoupons] = useState([]);
+  const [itemRequests, setItemRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchStoreData = async () => {
+    try {
+      setLoading(true);
+      const { data: invData, error: invError } = await supabase.from('inventory').select('*');
+      if (invError) throw invError;
+      setInventory(invData || []);
+
+      const { data: ordData, error: ordError } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+      if (ordError) throw ordError;
+      setOrders(ordData || []);
+
+      const { data: cpnData, error: cpnError } = await supabase.from('coupons').select('*');
+      if (cpnError) throw cpnError;
+      setCoupons(cpnData || []);
+
+      const { data: reqData, error: reqError } = await supabase.from('item_requests').select('*').order('created_at', { ascending: false });
+      if (reqError) throw reqError;
+      setItemRequests(reqData || []);
+    } catch (error) {
+      console.error('Error fetching store data:', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const storedInv = localStorage.getItem('nexus_inventory');
-    if (storedInv) {
-      const parsed = JSON.parse(storedInv);
-      if (parsed.length > 0 && parsed[0].image === undefined) {
-        setInventory(INITIAL_PRODUCTS);
-      } else {
-        setInventory(parsed);
-      }
-    } else {
-      setInventory(INITIAL_PRODUCTS);
-    }
-
-    const storedOrders = localStorage.getItem('nexus_orders');
-    if (storedOrders) setOrders(JSON.parse(storedOrders));
-
-    const storedCoupons = localStorage.getItem('nexus_coupons');
-    if (storedCoupons) setCoupons(JSON.parse(storedCoupons));
+    fetchStoreData();
   }, []);
 
-  useEffect(() => {
-    if (inventory.length > 0) localStorage.setItem('nexus_inventory', JSON.stringify(inventory));
-  }, [inventory]);
-
-  useEffect(() => {
-    localStorage.setItem('nexus_orders', JSON.stringify(orders));
-  }, [orders]);
-
-  useEffect(() => {
-    localStorage.setItem('nexus_coupons', JSON.stringify(coupons));
-  }, [coupons]);
-
-  const addProduct = (product) => setInventory([...inventory, { id: Date.now().toString(), ...product }]);
-  
-  const updateProduct = (id, updates) => {
-    setInventory(inventory.map(item => item.id === id ? { ...item, ...updates } : item));
+  const addProduct = async (product) => {
+    const { data, error } = await supabase.from('inventory').insert([product]).select();
+    if (error) {
+      console.error('Error adding product:', error.message);
+      return { success: false, error: error.message };
+    }
+    setInventory([...inventory, data[0]]);
+    return { success: true };
   };
   
-  const removeProduct = (id) => setInventory(inventory.filter(item => item.id !== id));
-
-  const addOrder = (order) => setOrders([{ id: Date.now().toString(), date: new Date().toISOString(), ...order }, ...orders]);
-
-  const addCoupon = (code, discountPercent) => setCoupons([...coupons, { code: code.toUpperCase(), discountPercent }]);
+  const updateProduct = async (id, updates) => {
+    const { error } = await supabase.from('inventory').update(updates).eq('id', id);
+    if (error) {
+      console.error('Error updating product:', error.message);
+      return { success: false, error: error.message };
+    }
+    setInventory(inventory.map(item => item.id === id ? { ...item, ...updates } : item));
+    return { success: true };
+  };
   
-  const removeCoupon = (code) => setCoupons(coupons.filter(c => c.code !== code));
+  const removeProduct = async (id) => {
+    const { error } = await supabase.from('inventory').delete().eq('id', id);
+    if (error) {
+      console.error('Error removing product:', error.message);
+      return { success: false, error: error.message };
+    }
+    setInventory(inventory.filter(item => item.id !== id));
+    return { success: true };
+  };
+
+  const addOrder = async (order) => {
+    const { data, error } = await supabase.from('orders').insert([order]).select();
+    if (error) {
+      console.error('Error adding order:', error.message);
+      return { success: false, error: error.message };
+    }
+    setOrders([data[0], ...orders]);
+    return { success: true };
+  };
+
+  const addCoupon = async (code, discountPercent) => {
+    const { data, error } = await supabase.from('coupons').insert([{ code: code.toUpperCase(), discount_percent: discountPercent }]).select();
+    if (error) {
+      console.error('Error adding coupon:', error.message);
+      return { success: false, error: error.message };
+    }
+    setCoupons([...coupons, data[0]]);
+    return { success: true };
+  };
+  
+  const removeCoupon = async (code) => {
+    const { error } = await supabase.from('coupons').delete().eq('code', code);
+    if (error) {
+      console.error('Error removing coupon:', error.message);
+      return { success: false, error: error.message };
+    }
+    setCoupons(coupons.filter(c => c.code !== code));
+    return { success: true };
+  };
+
+  const addItemRequest = async (request) => {
+    const { data, error } = await supabase.from('item_requests').insert([request]).select();
+    if (error) {
+      console.error('Error adding item request:', error.message);
+      return { success: false, error: error.message };
+    }
+    setItemRequests([data[0], ...itemRequests]);
+    return { success: true };
+  };
 
   const value = {
     inventory,
@@ -73,7 +120,11 @@ export const StoreProvider = ({ children }) => {
     addOrder,
     coupons,
     addCoupon,
-    removeCoupon
+    removeCoupon,
+    itemRequests,
+    addItemRequest,
+    loading,
+    refreshStore: fetchStoreData
   };
 
   return (

@@ -37,10 +37,10 @@ const AdminInventory = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const handleAddItem = (e) => {
+  const handleAddItem = async (e) => {
     e.preventDefault();
     if (!newItem.name || !newItem.stock || !newItem.price) return;
-    addProduct({ 
+    await addProduct({ 
       name: newItem.name, 
       stock: parseInt(newItem.stock), 
       price: parseFloat(newItem.price), 
@@ -67,9 +67,11 @@ const AdminInventory = () => {
     }
   };
 
-  const handleBulkRemove = () => {
+  const handleBulkRemove = async () => {
     if (confirm(`Are you sure you want to delete ${selectedItems.length} items?`)) {
-      selectedItems.forEach(id => removeProduct(id));
+      for (const id of selectedItems) {
+        await removeProduct(id);
+      }
       setSelectedItems([]);
     }
   };
@@ -79,8 +81,8 @@ const AdminInventory = () => {
     setEditForm({ ...item });
   };
 
-  const saveEdit = () => {
-    updateProduct(editingId, {
+  const saveEdit = async () => {
+    await updateProduct(editingId, {
       name: editForm.name,
       stock: parseInt(editForm.stock),
       price: parseFloat(editForm.price),

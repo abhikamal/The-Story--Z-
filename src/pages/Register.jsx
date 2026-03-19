@@ -10,9 +10,10 @@ const Register = () => {
     confirmPassword: ''
   });
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     
@@ -20,11 +21,12 @@ const Register = () => {
       return setError('Passwords do not match');
     }
     
-    try {
-      register(formData.name, formData.email, formData.password);
-    } catch (err) {
-      setError('Failed to register. Please try again.');
+    setIsLoading(true);
+    const result = await register(formData.name, formData.email, formData.password);
+    if (!result.success) {
+      setError(result.error || 'Failed to register');
     }
+    setIsLoading(false);
   };
 
   const handleChange = (e) => {
@@ -70,8 +72,8 @@ const Register = () => {
             </label>
           </div>
           
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-            Create Account
+          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={isLoading}>
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
         

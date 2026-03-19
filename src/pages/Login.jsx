@@ -6,17 +6,19 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     setError('');
     
-    try {
-      login(email, password);
-    } catch (err) {
-      setError('Failed to login. Please try again.');
+    const result = await login(email, password);
+    if (!result.success) {
+      setError(result.error || 'Failed to login');
     }
+    setIsLoading(false);
   };
 
   return (
@@ -63,8 +65,8 @@ const Login = () => {
             <a href="#" style={{ color: 'var(--accent-primary)' }} onClick={(e) => { e.preventDefault(); alert("Password reset link sent to your email!"); }}>Forgot password?</a>
           </div>
           
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-            Sign In
+          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={isLoading}>
+            {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
         
