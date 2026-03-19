@@ -6,6 +6,15 @@ const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
+// List of emails that have admin privileges
+const ADMIN_EMAILS = [
+  'siri7@example.com',
+  'siri',
+  'abhikamal2020@gmail.com',
+  'umav4000@gmail.com',
+  // Add more admin emails here
+];
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -83,7 +92,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     loading,
-    isAdmin: user?.email === 'siri' || user?.email === 'siri7@example.com' // Example admin check
+    isAdmin: user && ADMIN_EMAILS.includes(user.email)
   };
 
   return (
