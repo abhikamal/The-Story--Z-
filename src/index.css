@@ -15,8 +15,8 @@
   --danger: #ef233c;
   --warning: #f59e0b;
   
-  --font-heading: 'Eagle Horizon-Personal use', sans-serif;
-  --font-body: 'Eagle Horizon-Personal use', sans-serif;
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Playfair Display', serif;
   
   --transition-fast: 0.15s ease;
   --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
