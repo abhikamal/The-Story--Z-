@@ -31,7 +31,9 @@ export const StoreProvider = ({ children }) => {
       if (reqError) throw reqError;
       setItemRequests(reqData || []);
     } catch (error) {
-      console.error('Error fetching store data:', error.message);
+      console.error('CRITICAL STORE ERROR:', error.message);
+      // Ensure state is at least empty rather than stuck
+      setInventory(prev => prev.length ? prev : []);
     } finally {
       setLoading(false);
     }

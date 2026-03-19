@@ -3,7 +3,7 @@ import { useStore } from '../context/StoreContext';
 
 const Catalog = () => {
   const { addToCart } = useCart();
-  const { inventory } = useStore();
+  const { inventory, loading } = useStore();
 
   const handleAddToCart = (product) => {
     addToCart(product);
@@ -15,9 +15,20 @@ const Catalog = () => {
       <h1>Product <span className="text-gradient">Catalog</span></h1>
       <p style={{ color: 'var(--text-secondary)' }}>Browse our premium selection of items.</p>
       
-      <div className="grid mt-4" style={{ gridTemplateColumns: 'revert' }}>
-        <div className="product-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
-          {inventory.map(product => (
+      <div className="mt-4">
+        {loading ? (
+          <div className="flex-center" style={{ height: '300px', flexDirection: 'column', gap: '1rem' }}>
+            <div className="spinner"></div>
+            <p style={{ color: 'var(--text-secondary)' }}>Loading exclusive collection...</p>
+          </div>
+        ) : inventory.length === 0 ? (
+          <div className="glass-card flex-center" style={{ height: '300px', flexDirection: 'column', gap: '1rem' }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem' }}>No products found in the catalog.</p>
+            <button className="btn btn-secondary" onClick={() => window.location.reload()}>Refresh Page</button>
+          </div>
+        ) : (
+          <div className="product-grid">
+            {inventory.map(product => (
             <div key={product.id} className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {product.image ? (
                 <div style={{ height: '200px', width: '100%', overflow: 'hidden', borderRadius: 'var(--border-radius-sm)' }}>
@@ -37,6 +48,7 @@ const Catalog = () => {
             </div>
           ))}
         </div>
+        )}
       </div>
     </div>
   );

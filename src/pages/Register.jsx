@@ -11,6 +11,7 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
   const { register } = useAuth();
 
   const handleSubmit = async (e) => {
@@ -25,6 +26,8 @@ const Register = () => {
     const result = await register(formData.name, formData.email, formData.password);
     if (!result.success) {
       setError(result.error || 'Failed to register');
+    } else if (result.message) {
+      setSuccessMsg(result.message);
     }
     setIsLoading(false);
   };
@@ -41,7 +44,8 @@ const Register = () => {
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Join The Story 'Z' for exclusive collections</p>
         </div>
         
-        {error && <div style={{ color: 'var(--danger)', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
+        {error && <div style={{ color: 'var(--danger)', marginBottom: '1rem', textAlign: 'center', background: 'rgba(239, 35, 60, 0.1)', padding: '0.5rem', borderRadius: '4px' }}>{error}</div>}
+        {successMsg && <div style={{ color: 'var(--success)', marginBottom: '1rem', textAlign: 'center', background: 'rgba(47, 179, 68, 0.1)', padding: '0.5rem', borderRadius: '4px' }}>{successMsg}</div>}
         
         <form onSubmit={handleSubmit}>
           <div className="input-group">

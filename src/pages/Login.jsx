@@ -29,7 +29,7 @@ const Login = () => {
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Enter your details to access your account</p>
         </div>
         
-        {error && <div style={{ color: 'var(--danger)', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
+        {error && <div style={{ color: 'var(--danger)', marginBottom: '1rem', textAlign: 'center', background: 'rgba(239, 35, 60, 0.1)', padding: '0.5rem', borderRadius: '4px' }}>{error}</div>}
         
         <form onSubmit={handleSubmit}>
           <div className="input-group">
@@ -72,7 +72,7 @@ const Login = () => {
         
         <div className="text-center mt-4" style={{ fontSize: '0.95rem' }}>
           <span style={{ color: 'var(--text-secondary)' }}>Don't have an account? </span>
-          <Link href="/register" style={{ fontWeight: '500' }}>Sign up</Link>
+          <Link to="/register" style={{ fontWeight: '500', color: 'var(--accent-primary)' }}>Sign up</Link>
         </div>
       </div>
     </div>

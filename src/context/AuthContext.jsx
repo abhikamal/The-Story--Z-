@@ -43,15 +43,21 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (error) {
-        console.error('Login error:', error.message);
-        return { success: false, error: error.message };
+        let msg = error.message;
+        if (msg.includes('Invalid login credentials')) {
+          msg = 'Invalid email or password. Please check your credentials.';
+        } else if (msg.includes('Email not confirmed')) {
+          msg = 'Please confirm your email address before logging in.';
+        }
+        console.error('Login error:', msg);
+        return { success: false, error: msg };
       }
 
       navigate('/catalog');
       return { success: true };
     } catch (err) {
       console.error('Unexpected login error:', err);
-      return { success: false, error: 'An unexpected error occurred' };
+      return { success: false, error: 'Connection error. Please try again later.' };
     }
   };
 
@@ -72,11 +78,15 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: error.message };
       }
 
+      if (data.user && data.session === null) {
+        return { success: true, message: 'Registration successful! Please check your email for a confirmation link.' };
+      }
+
       navigate('/catalog');
       return { success: true };
     } catch (err) {
       console.error('Unexpected registration error:', err);
-      return { success: false, error: 'An unexpected error occurred' };
+      return { success: false, error: 'Registration failed. Please check your connection.' };
     }
   };
 
