@@ -14,6 +14,9 @@ const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState('UPI');
   const [couponCode, setCouponCode] = useState('');
   const [discount, setDiscount] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [transactionId, setTransactionId] = useState('');
+  const [orderId] = useState(() => `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`);
 
   const [shippingData, setShippingData] = useState({
     firstName: '',
@@ -51,28 +54,59 @@ const Checkout = () => {
     }
   };
 
+  const validateForm = () => {
+    const requiredFields = ['firstName', 'lastName', 'address', 'city', 'state', 'zip', 'phone'];
+    for (const field of requiredFields) {
+      if (!shippingData[field] || shippingData[field].trim() === '') {
+        alert(`Please fill in your ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}.`);
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleCheckout = async (e) => {
     e.preventDefault();
     if (cartItems.length === 0) {
       alert("Your cart is empty!");
       return;
     }
+
+    if (!validateForm()) return;
     
-    // Process "payment" and save order
-    await addOrder({
-      items: cartItems,
-      total: finalTotal,
-      paymentMethod,
-      status: 'Processing',
-      shippingAddress: `${shippingData.address}, ${shippingData.city}, ${shippingData.state} ${shippingData.zip}`,
-      customerName: `${shippingData.firstName} ${shippingData.lastName}`,
-      customerEmail: user.email,
-      customerPhone: shippingData.phone
-    });
+    if (paymentMethod === 'UPI' && !transactionId) {
+      alert("Please enter the Transaction ID / UTR after completing your payment.");
+      return;
+    }
     
-    alert(`Payment of ₹${finalTotal.toFixed(2)} via ${paymentMethod} successful! Your order has been placed.`);
-    clearCart();
-    navigate('/');
+    setIsSubmitting(true);
+    try {
+      // Process "payment" and save order
+      const result = await addOrder({
+        items: cartItems,
+        total: finalTotal,
+        payment_method: paymentMethod,
+        status: 'Processing',
+        shipping_address: `${shippingData.address}, ${shippingData.city}, ${shippingData.state} ${shippingData.zip}`,
+        customer_name: `${shippingData.firstName} ${shippingData.lastName}`,
+        customer_email: user.email,
+        customer_phone: shippingData.phone,
+        transaction_id: paymentMethod === 'UPI' ? transactionId : 'PREPAID-' + orderId,
+        user_id: user.id 
+      });
+
+      if (result.success) {
+        alert(`Payment of ₹${finalTotal.toFixed(2)} via ${paymentMethod} successful! Your order has been placed.`);
+        clearCart();
+        navigate('/');
+      } else {
+        alert(`Failed to place order: ${result.error || 'Server error'}. Please try again.`);
+      }
+    } catch (err) {
+      alert("An unexpected error occurred. Please check your connection.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -156,11 +190,31 @@ const Checkout = () => {
             
             {paymentMethod === 'UPI' && (
               <div className="text-center mb-4" style={{ padding: '2rem', background: 'var(--surface-accent)', borderRadius: '8px' }}>
-                <QrCode size={120} style={{ margin: '0 auto 1rem', color: 'var(--text-secondary)' }} />
-                <p>Scan to pay <strong>₹{finalTotal.toFixed(2)}</strong></p>
-                <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                  <input type="text" className="input" placeholder="Enter UPI ID (e.g. name@okbank)" style={{ maxWidth: '200px' }} />
-                  <button className="btn btn-secondary">Verify</button>
+                <div style={{ marginBottom: '1.5rem', background: 'white', padding: '1rem', borderRadius: '8px', display: 'inline-block' }}>
+                  <img 
+                    src={`https://bharatupi.com/api/v1/generate_qr?api_key=${import.meta.env.VITE_BHARAT_UPI_KEY || 'PLCHLDR'}&upi_id=${import.meta.env.VITE_BHARAT_UPI_VPA || 'upi@id'}&amount=${finalTotal.toFixed(2)}&order_id=${orderId}&name=The+Story+Z`}
+                    alt="Scan to Pay" 
+                    style={{ width: '200px', height: '200px', display: 'block' }}
+                    onError={(e) => e.target.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=${import.meta.env.VITE_BHARAT_UPI_VPA || 'upi@id'}&pn=The+Story+Z&am=${finalTotal.toFixed(2)}&tr=${orderId}&cu=INR`)}`}
+                  />
+                </div>
+                <h3>Scan to pay <strong>₹{finalTotal.toFixed(2)}</strong></h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '0.5rem' }}>Order ID: {orderId}</p>
+                
+                <div style={{ marginTop: '2rem', textAlign: 'left', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+                  <label htmlFor="utr" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Enter Transaction ID / UTR</label>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Please enter the 12-digit UTR number from your payment app for verification.</p>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input 
+                      type="text" 
+                      id="utr"
+                      className="input" 
+                      placeholder="12 digit UTR Number" 
+                      value={transactionId}
+                      onChange={e => setTransactionId(e.target.value)}
+                    />
+                    <button className="btn btn-secondary" onClick={() => alert("Verification check initiated...")}>Verify</button>
+                  </div>
                 </div>
               </div>
             )}
@@ -234,8 +288,14 @@ const Checkout = () => {
             <span className="text-gradient">₹{finalTotal.toFixed(2)}</span>
           </div>
           
-          <button onClick={handleCheckout} className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}>
-            <ShieldCheck size={20} /> Pay ₹{finalTotal.toFixed(2)}
+          <button 
+            onClick={handleCheckout} 
+            disabled={isSubmitting}
+            className="btn btn-primary" 
+            style={{ width: '100%', padding: '1rem', fontSize: '1.1rem', opacity: isSubmitting ? 0.7 : 1 }}>
+            {isSubmitting ? 'Processing...' : (
+              <><ShieldCheck size={20} /> Pay ₹{finalTotal.toFixed(2)}</>
+            )}
           </button>
           
           <p className="text-center mt-2" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
