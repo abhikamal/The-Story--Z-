@@ -28,6 +28,18 @@ export const CartProvider = ({ children }) => {
     });
   };
 
+  const updateQuantity = (id, delta) => {
+    setCartItems(prev => {
+      return prev.map(item => {
+        if (item.id === id) {
+          const newQuantity = Math.max(0, item.quantity + delta);
+          return { ...item, quantity: newQuantity };
+        }
+        return item;
+      }).filter(item => item.quantity > 0);
+    });
+  };
+
   const removeFromCart = (id) => {
     setCartItems(prev => prev.filter(item => item.id !== id));
   };
@@ -42,6 +54,7 @@ export const CartProvider = ({ children }) => {
     cartItems,
     addToCart,
     removeFromCart,
+    updateQuantity,
     clearCart,
     getCartTotal
   };

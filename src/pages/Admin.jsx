@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Admin = () => {
-  const { inventory, orders, coupons, itemRequests, addCoupon, removeCoupon } = useStore();
+  const { inventory, orders, coupons, itemRequests, addCoupon, removeCoupon, updateItemRequestStatus } = useStore();
   const { isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [newCoupon, setNewCoupon] = useState({ code: '', discount: '' });
@@ -93,15 +93,44 @@ const Admin = () => {
                   <div key={req.id} style={{ display: 'flex', gap: '1rem', padding: '1rem', background: 'var(--surface-accent)', borderRadius: '8px' }}>
                     {req.image && <img src={req.image} alt="request" style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }} />}
                     <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <strong>{req.item_name}</strong>
-                        <span style={{ fontSize: '0.75rem', padding: '2px 6px', borderRadius: '4px', background: 'var(--accent-primary)', color: 'white' }}>{req.status}</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong style={{ fontSize: '1.1rem' }}>{req.item_name}</strong>
+                        <span style={{ 
+                          fontSize: '0.75rem', 
+                          padding: '4px 8px', 
+                          borderRadius: '4px', 
+                          fontWeight: 600,
+                          backgroundColor: req.status === 'Approved' ? 'rgba(47, 179, 68, 0.2)' : 
+                                         req.status === 'Rejected' ? 'rgba(239, 35, 60, 0.2)' : 
+                                         'rgba(67, 97, 238, 0.2)',
+                          color: req.status === 'Approved' ? 'var(--success)' : 
+                                 req.status === 'Rejected' ? 'var(--danger)' : 
+                                 'var(--accent-primary)'
+                        }}>
+                          {req.status}
+                        </span>
                       </div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                        User: {req.user_email} • Cat: {req.category}
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0' }}>
+                        User: {req.user_email} • Cat: {req.category} • Budget: ₹{req.budget || 'N/A'}
                       </div>
-                      <p style={{ margin: '0.5rem 0', fontSize: '0.9rem' }}>{req.description}</p>
-                      <div style={{ fontWeight: 600 }}>Budget: ₹{req.budget || 'N/A'}</div>
+                      <p style={{ margin: '0.75rem 0', fontSize: '0.95rem', color: 'var(--text-primary)' }}>{req.description}</p>
+                      
+                      {req.status === 'Pending' && (
+                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                          <button 
+                            onClick={() => updateItemRequestStatus(req.id, 'Approved')}
+                            className="btn btn-primary" 
+                            style={{ padding: '0.4rem 1rem', fontSize: '0.85rem', background: 'var(--success)' }}>
+                            Approve
+                          </button>
+                          <button 
+                            onClick={() => updateItemRequestStatus(req.id, 'Rejected')}
+                            className="btn btn-secondary" 
+                            style={{ padding: '0.4rem 1rem', fontSize: '0.85rem', color: 'var(--danger)' }}>
+                            Reject
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

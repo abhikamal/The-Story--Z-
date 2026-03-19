@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Trash2, ShoppingBag, ArrowRight, Plus, Minus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 const Cart = () => {
-  const { cartItems, removeFromCart, getCartTotal } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, getCartTotal } = useCart();
 
   return (
     <div className="container" style={{ paddingTop: '100px', minHeight: '80vh' }}>
@@ -30,7 +30,21 @@ const Cart = () => {
                 <div style={{ width: '100px', height: '100px', background: 'var(--surface-accent)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyItems: 'center', padding: '10px' }}>{item.category}</div>
                 <div style={{ flex: 1 }}>
                   <h4>{item.name}</h4>
-                  <p style={{ color: 'var(--text-secondary)' }}>Quantity: {item.quantity}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '0.5rem 0' }}>
+                    <button 
+                      onClick={() => updateQuantity(item.id, -1)} 
+                      className="btn-icon" 
+                      style={{ background: 'var(--surface-accent)', border: 'none', borderRadius: '4px', padding: '4px', cursor: 'pointer' }}>
+                      <Minus size={14} />
+                    </button>
+                    <span style={{ fontWeight: 600, minWidth: '20px', textAlign: 'center' }}>{item.quantity}</span>
+                    <button 
+                      onClick={() => updateQuantity(item.id, 1)} 
+                      className="btn-icon" 
+                      style={{ background: 'var(--surface-accent)', border: 'none', borderRadius: '4px', padding: '4px', cursor: 'pointer' }}>
+                      <Plus size={14} />
+                    </button>
+                  </div>
                   <p className="text-gradient" style={{ fontWeight: 600 }}>₹{(item.price * item.quantity).toFixed(2)}</p>
                 </div>
                 <button onClick={() => removeFromCart(item.id)} className="btn-icon" style={{ background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer' }}>

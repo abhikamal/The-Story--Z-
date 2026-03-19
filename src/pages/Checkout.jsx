@@ -2,15 +2,37 @@ import { useState } from 'react';
 import { CreditCard, Truck, ShieldCheck, QrCode } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useStore } from '../context/StoreContext';
+import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const Checkout = () => {
   const { cartItems, getCartTotal, clearCart } = useCart();
   const { addOrder, coupons } = useStore();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState('UPI');
   const [couponCode, setCouponCode] = useState('');
   const [discount, setDiscount] = useState(0);
+
+  const [shippingData, setShippingData] = useState({
+    firstName: '',
+    lastName: '',
+    address: '',
+    city: '',
+    state: '',
+    zip: '',
+    phone: ''
+  });
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/login');
+    }
+  }, [user, authLoading, navigate]);
+
+  if (authLoading) return <div className="container" style={{ paddingTop: '100px' }}>Loading...</div>;
+  if (!user) return null;
 
   const subtotal = getCartTotal();
   const tax = subtotal * 0.08;
@@ -42,7 +64,10 @@ const Checkout = () => {
       total: finalTotal,
       paymentMethod,
       status: 'Processing',
-      shippingAddress: 'Address collected from form'
+      shippingAddress: `${shippingData.address}, ${shippingData.city}, ${shippingData.state} ${shippingData.zip}`,
+      customerName: `${shippingData.firstName} ${shippingData.lastName}`,
+      customerEmail: user.email,
+      customerPhone: shippingData.phone
     });
     
     alert(`Payment of ₹${finalTotal.toFixed(2)} via ${paymentMethod} successful! Your order has been placed.`);
@@ -67,31 +92,36 @@ const Checkout = () => {
               <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '-1rem' }}>
                 <div className="input-group">
                   <label htmlFor="fName">First Name</label>
-                  <input type="text" id="fName" className="input" placeholder="John" required />
+                  <input type="text" id="fName" className="input" placeholder="John" value={shippingData.firstName} onChange={e => setShippingData({...shippingData, firstName: e.target.value})} required />
                 </div>
                 <div className="input-group">
                   <label htmlFor="lName">Last Name</label>
-                  <input type="text" id="lName" className="input" placeholder="Doe" required />
+                  <input type="text" id="lName" className="input" placeholder="Doe" value={shippingData.lastName} onChange={e => setShippingData({...shippingData, lastName: e.target.value})} required />
                 </div>
               </div>
               
               <div className="input-group">
                 <label htmlFor="address">Address</label>
-                <input type="text" id="address" className="input" placeholder="123 Example St" required />
+                <input type="text" id="address" className="input" placeholder="123 Example St" value={shippingData.address} onChange={e => setShippingData({...shippingData, address: e.target.value})} required />
+              </div>
+
+              <div className="input-group">
+                <label htmlFor="phone">Phone Number</label>
+                <input type="tel" id="phone" className="input" placeholder="+91 XXXXX XXXXX" value={shippingData.phone} onChange={e => setShippingData({...shippingData, phone: e.target.value})} required />
               </div>
               
               <div className="grid" style={{ gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '-1rem' }}>
                 <div className="input-group">
                   <label htmlFor="city">City</label>
-                  <input type="text" id="city" className="input" placeholder="Metropolis" required />
+                  <input type="text" id="city" className="input" placeholder="Metropolis" value={shippingData.city} onChange={e => setShippingData({...shippingData, city: e.target.value})} required />
                 </div>
                 <div className="input-group">
                   <label htmlFor="state">State/Prov</label>
-                  <input type="text" id="state" className="input" placeholder="NY" required />
+                  <input type="text" id="state" className="input" placeholder="NY" value={shippingData.state} onChange={e => setShippingData({...shippingData, state: e.target.value})} required />
                 </div>
                 <div className="input-group">
                   <label htmlFor="zip">ZIP</label>
-                  <input type="text" id="zip" className="input" placeholder="10001" required />
+                  <input type="text" id="zip" className="input" placeholder="10001" value={shippingData.zip} onChange={e => setShippingData({...shippingData, zip: e.target.value})} required />
                 </div>
               </div>
             </form>

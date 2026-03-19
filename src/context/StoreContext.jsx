@@ -113,6 +113,16 @@ export const StoreProvider = ({ children }) => {
     return { success: true };
   };
 
+  const updateItemRequestStatus = async (id, status) => {
+    const { error } = await supabase.from('item_requests').update({ status }).eq('id', id);
+    if (error) {
+      console.error('Error updating status:', error.message);
+      return { success: false, error: error.message };
+    }
+    setItemRequests(itemRequests.map(req => req.id === id ? { ...req, status } : req));
+    return { success: true };
+  };
+
   const value = {
     inventory,
     addProduct,
@@ -125,6 +135,7 @@ export const StoreProvider = ({ children }) => {
     removeCoupon,
     itemRequests,
     addItemRequest,
+    updateItemRequestStatus,
     loading,
     refreshStore: fetchStoreData
   };
