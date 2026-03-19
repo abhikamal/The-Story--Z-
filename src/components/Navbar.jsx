@@ -29,7 +29,7 @@ const Navbar = () => {
           )}
         </div>
 
-        <div className="nav-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div className="nav-actions mobile-nav-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <button className="btn-icon" style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer' }} onClick={() => alert("Search functionality coming soon")} title="Search">
             <Search size={20} />
           </button>

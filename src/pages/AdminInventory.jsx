@@ -113,37 +113,39 @@ const AdminInventory = () => {
         <h1 style={{ margin: 0 }}>Inventory <span className="text-gradient">Management</span></h1>
       </div>
 
-      <div className="glass-card mb-4" style={{ padding: '1.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', gap: '1rem', flex: 1, minWidth: '300px' }}>
-          <div className="input" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 2, padding: '0.5rem 1rem' }}>
-            <Search size={18} color="var(--text-secondary)" />
-            <input 
-              type="text" 
-              placeholder="Search products..." 
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', outline: 'none', width: '100%' }}
-            />
+      <div className="glass-card mb-4" style={{ padding: '1.5rem' }}>
+        <div className="grid" style={{ gridTemplateColumns: '1fr auto', gap: '1rem', alignItems: 'center' }}>
+          <div className="grid" style={{ gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
+            <div className="input" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}>
+              <Search size={18} color="var(--text-secondary)" />
+              <input 
+                type="text" 
+                placeholder="Search products..." 
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', outline: 'none', width: '100%' }}
+              />
+            </div>
+            <select className="input" value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}>
+              <option value="All">All Categories</option>
+              <option value="Figures">Figures</option>
+              <option value="Models">Models</option>
+              <option value="Decor">Decor</option>
+              <option value="Apparel">Apparel</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
-          <select className="input" value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)} style={{ flex: 1 }}>
-            <option value="All">All Categories</option>
-            <option value="Figures">Figures</option>
-            <option value="Models">Models</option>
-            <option value="Decor">Decor</option>
-            <option value="Apparel">Apparel</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          {selectedItems.length > 0 && (
-            <button className="btn btn-secondary" onClick={handleBulkRemove} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: 'var(--danger)', color: 'var(--danger)' }}>
-              <Trash2 size={16} /> Delete Selected ({selectedItems.length})
+          
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            {selectedItems.length > 0 && (
+              <button className="btn btn-secondary" onClick={handleBulkRemove} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: 'var(--danger)', color: 'var(--danger)' }}>
+                <Trash2 size={16} /> Delete Selected ({selectedItems.length})
+              </button>
+            )}
+            <button className="btn btn-primary" onClick={() => setIsAdding(!isAdding)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Plus size={18} /> Add New Item
             </button>
-          )}
-          <button className="btn btn-primary" onClick={() => setIsAdding(!isAdding)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Plus size={18} /> Add New Item
-          </button>
+          </div>
         </div>
       </div>
 
